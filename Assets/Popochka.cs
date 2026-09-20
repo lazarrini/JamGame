@@ -1,18 +1,36 @@
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
+
+
 
 public class Popochka : MonoBehaviour
 {
-    [SerializeField] private float _counter;
+    private Rigidbody2D _rigidbody;
+    private float speed = 3f;
 
     private void Awake()
     {
-        _counter = 0;
+        _rigidbody = GetComponent<Rigidbody2D>();
+        
+        
+        
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    private void Update()
     {
-        _counter++;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 1f);
+        if (hit)
+        {
+            
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _rigidbody.AddForce(Vector2.up * speed, ForceMode2D.Impulse);
+        }
+
     }
 }
+
+
+
