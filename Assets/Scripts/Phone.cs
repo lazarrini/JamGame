@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 public class Phone : MonoBehaviour
 {
-    public PhoneButton[] phoneButtons;
+    //public PhoneButton[] phoneButtons;
     [SerializeField] private int greenButCount;
     [SerializeField] private int redButCount;
     private List<int> _greenButs = new List<int>();
