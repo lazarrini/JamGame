@@ -10,7 +10,7 @@ public class GameData : ScriptableObject
 
     public void AddArea(int amount)
     {
-        food++; 
+        area += amount;
     }
 
     public void AddFood(int amount)
