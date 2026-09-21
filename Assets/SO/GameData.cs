@@ -15,6 +15,6 @@ public class GameData : ScriptableObject
 
     public void AddFood(int amount)
     {
-        
+        food += amount;
     }
 }
