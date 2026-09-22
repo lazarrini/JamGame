@@ -10,6 +10,8 @@ public class Phone : MonoBehaviour
     [SerializeField] private int greenButCount;
     [SerializeField] private int redButCount;
 
+    [SerializeField] private PlayerStats stats;
+
     [SerializeField] private Transform statsTransform;
     
     public Sprite redSprite;
@@ -37,8 +39,8 @@ public class Phone : MonoBehaviour
         
         startPos = currentFrogImage.rectTransform.anchoredPosition;
         startRot = currentFrogImage.rectTransform.localRotation;
-        
-        DrawFrogOnScreen();
+
+        TakeRandomFrog();
     }
 
     private void ChooseButtonsIndexes()
@@ -86,11 +88,15 @@ public class Phone : MonoBehaviour
                 phoneButtons[_redButs[i] - 1].gameObject.GetComponent<Image>().sprite = redSprite;
                 phoneButtons[_redButs[i] - 1].onClick.AddListener(() => SwipeFrogAnimation(-1));
             }
+
             for (int i = 0; i < _greenButs.Count; i++)
             {
-                
+
                 phoneButtons[_greenButs[i] - 1].gameObject.GetComponent<Image>().sprite = greenSprite;
-                phoneButtons[_greenButs[i] - 1].onClick.AddListener(() => SwipeFrogAnimation(1));
+                phoneButtons[_greenButs[i] - 1].onClick.AddListener(() =>
+                {
+                    SwipeFrogAnimation(1);
+                });
             }
             
             _redButs.Clear();
@@ -103,12 +109,13 @@ public class Phone : MonoBehaviour
 
     public void SwipeFrogAnimation(float direction)
     {
+        SwipeFrog(direction);
         if (isSwiped) return;
         isSwiped = true;
         RectTransform rectTransform = currentFrogImage.rectTransform;
         
         Sequence seq = DOTween.Sequence();
-        seq.Append(rectTransform.DOAnchorPosX(rectTransform.anchoredPosition.x + 300f * direction, 2f).SetEase(Ease.OutElastic));
+        seq.Append(rectTransform.DOAnchorPosX(rectTransform.anchoredPosition.x + 300f * direction, 1f).SetEase(Ease.OutElastic));
         seq.Join(rectTransform.DORotate(new Vector3(0, 0, -15f * direction), 1f).SetEase(Ease.OutCubic));
         seq.Join(currentFrogImage.DOFade(0f, 1f));
         seq.OnComplete(() =>
@@ -117,25 +124,31 @@ public class Phone : MonoBehaviour
             currentFrogImage.rectTransform.localRotation = startRot;
             currentFrogImage.color = new Color(currentFrogImage.color.r, currentFrogImage.color.g, 
                 currentFrogImage.color.b, 1f);
-            SwipeFrog();
+            
             isSwiped = false;
         });
     }
-    private void SwipeFrog()
+    private void SwipeFrog(float direction)
     {
+        FrogManSO frogMan = TakeRandomFrog();
         currentFrogImage.sprite = nextFrogImage.sprite;     
-        nextFrogImage.sprite = DrawFrogOnScreen().frogSprite;
-
-        GameObject popup = PopupPool.Instance.Get();
-        popup.transform.position = statsTransform.position;
+        nextFrogImage.sprite = frogMan.frogSprite;
+        if(direction == 1)
+        {
+            HandleStatBonus(frogMan);
         
-        PopupNumber popupNumber = popup.GetComponent<PopupNumber>();
-        Color color = Color.darkOliveGreen;
-        int stat = 10;
-        popupNumber.Play(stat.ToString(), color);
+            GameObject popup = PopupPool.Instance.Get();
+            popup.transform.position = statsTransform.position;
+        
+            PopupNumber popupNumber = popup.GetComponent<PopupNumber>();
+            Color color = Color.darkOliveGreen;
+            int stat = 10;
+            popupNumber.Play(stat.ToString(), color);    
+        }
+        
     }
 
-    private FrogManSO DrawFrogOnScreen()
+    private FrogManSO TakeRandomFrog()
     {
         int randomIndex = UnityEngine.Random.Range(0, frogs.Length);
         var frog = frogs[randomIndex];
@@ -143,6 +156,9 @@ public class Phone : MonoBehaviour
 
     }
 
-
+    private void HandleStatBonus(FrogManSO frog)
+    {
+        stats.ChangeStats(frog);   
+    }
 
 }
