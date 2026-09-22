@@ -6,28 +6,37 @@ using DG.Tweening;
 
 public class Phone : MonoBehaviour
 {
-    [SerializeField] private Image[] phoneButtons;
+    [SerializeField] private Button[] phoneButtons;
     [SerializeField] private int greenButCount;
     [SerializeField] private int redButCount;
-    private List<int> _greenButs = new List<int>();
-    private List<int> _redButs = new List<int>();
+    
     public Sprite redSprite;
     public Sprite greenSprite;
     public Sprite graySprite;
 
     public Image currentFrogImage;
     public Image nextFrogImage;
-    
-    float timer = 0;
 
+    [SerializeField] private FrogManSO[] frogs;
+    
+    
+    private float timer = 0;
+
+    private List<int> _greenButs = new List<int>();
+    private List<int> _redButs = new List<int>();
+    
     private Vector2 startPos;
     private Quaternion startRot;
+
+    private bool isSwiped;
     private void Awake()
     {
         timer = 0;
         
         startPos = currentFrogImage.rectTransform.anchoredPosition;
         startRot = currentFrogImage.rectTransform.localRotation;
+        
+        DrawFrogOnScreen();
     }
 
     private void ChooseButtonsIndexes()
@@ -61,22 +70,25 @@ public class Phone : MonoBehaviour
         timer += Time.deltaTime;
         if (timer > 2f)
         {
+            
             ChooseButtonsIndexes();
-            foreach (Image img in phoneButtons)
+            foreach (Button but in phoneButtons)
             {
-                img.sprite = graySprite;
-                
+                but.gameObject.GetComponent<Image>().sprite = graySprite;
+                but.onClick.RemoveAllListeners();
             }
             
             for (int i = 0; i < _redButs.Count; i++)
             {
                 
-                phoneButtons[_redButs[i] - 1].sprite = redSprite;
+                phoneButtons[_redButs[i] - 1].gameObject.GetComponent<Image>().sprite = redSprite;
+                phoneButtons[_redButs[i] - 1].onClick.AddListener(() => SwipeFrogAnimation(-1));
             }
             for (int i = 0; i < _greenButs.Count; i++)
             {
                 
-                phoneButtons[_greenButs[i] - 1].sprite = greenSprite;
+                phoneButtons[_greenButs[i] - 1].gameObject.GetComponent<Image>().sprite = greenSprite;
+                phoneButtons[_greenButs[i] - 1].onClick.AddListener(() => SwipeFrogAnimation(1));
             }
             
             _redButs.Clear();
@@ -89,27 +101,37 @@ public class Phone : MonoBehaviour
 
     public void SwipeFrogAnimation(float direction)
     {
+        if (isSwiped) return;
+        isSwiped = true;
         RectTransform rectTransform = currentFrogImage.rectTransform;
         
         Sequence seq = DOTween.Sequence();
-        seq.Append(rectTransform.DOAnchorPosX(rectTransform.anchoredPosition.x + 300f * direction, 1f).SetEase(Ease.OutElastic));
+        seq.Append(rectTransform.DOAnchorPosX(rectTransform.anchoredPosition.x + 300f * direction, 2f).SetEase(Ease.OutElastic));
         seq.Join(rectTransform.DORotate(new Vector3(0, 0, -15f * direction), 1f).SetEase(Ease.OutCubic));
-        seq.Join(currentFrogImage.DOFade(0f, 0.4f));
+        seq.Join(currentFrogImage.DOFade(0f, 1f));
         seq.OnComplete(() =>
         {
-            currentFrogImage.gameObject.SetActive(false);
             currentFrogImage.rectTransform.anchoredPosition = startPos;
             currentFrogImage.rectTransform.localRotation = startRot;
-            currentFrogImage.color = new Color(currentFrogImage.color.r, currentFrogImage.color.g,
+            currentFrogImage.color = new Color(currentFrogImage.color.r, currentFrogImage.color.g, 
                 currentFrogImage.color.b, 1f);
-            currentFrogImage = nextFrogImage;
-            nextFrogImage = currentFrogImage;
+            SwipeFrog();
+            isSwiped = false;
         });
     }
-    public void SwipeFrog()
+    private void SwipeFrog()
     {
-        SwipeFrogAnimation(-1);
-        
+        currentFrogImage.sprite = nextFrogImage.sprite;     
+        nextFrogImage.sprite = DrawFrogOnScreen().frogSprite; 
+
+    }
+
+    private FrogManSO DrawFrogOnScreen()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, frogs.Length);
+        var frog = frogs[randomIndex];
+        return frog;
+
     }
 
 
