@@ -9,6 +9,8 @@ public class Phone : MonoBehaviour
     [SerializeField] private Button[] phoneButtons;
     [SerializeField] private int greenButCount;
     [SerializeField] private int redButCount;
+
+    [SerializeField] private Transform statsTransform;
     
     public Sprite redSprite;
     public Sprite greenSprite;
@@ -122,8 +124,15 @@ public class Phone : MonoBehaviour
     private void SwipeFrog()
     {
         currentFrogImage.sprite = nextFrogImage.sprite;     
-        nextFrogImage.sprite = DrawFrogOnScreen().frogSprite; 
+        nextFrogImage.sprite = DrawFrogOnScreen().frogSprite;
 
+        GameObject popup = PopupPool.Instance.Get();
+        popup.transform.position = statsTransform.position;
+        
+        PopupNumber popupNumber = popup.GetComponent<PopupNumber>();
+        Color color = Color.darkOliveGreen;
+        int stat = 10;
+        popupNumber.Play(stat.ToString(), color);
     }
 
     private FrogManSO DrawFrogOnScreen()
