@@ -12,11 +12,15 @@ public class Phone : MonoBehaviour
 
     [SerializeField] private PlayerStats stats;
 
-    [SerializeField] private Transform statsTransform;
+    [SerializeField] private Transform foodStatsTransform;
+    [SerializeField] private Transform hearthsStatsTransform;
+    [SerializeField] private Transform areaStatsTransform;
     
     public Sprite redSprite;
     public Sprite greenSprite;
     public Sprite graySprite;
+    public Sprite skipSprite;
+    public Sprite selectSprite;
 
     public Image currentFrogImage;
     public Image nextFrogImage;
@@ -33,6 +37,8 @@ public class Phone : MonoBehaviour
     private Quaternion startRot;
 
     private bool isSwiped;
+
+    [SerializeField] private RectTransform phoneTransform;
     private void Awake()
     {
         timer = 0;
@@ -86,7 +92,12 @@ public class Phone : MonoBehaviour
             {
                 
                 phoneButtons[_redButs[i] - 1].gameObject.GetComponent<Image>().sprite = redSprite;
-                phoneButtons[_redButs[i] - 1].onClick.AddListener(() => SwipeFrogAnimation(-1));
+                phoneButtons[_redButs[i] - 1].onClick.AddListener(() =>
+                {
+                    
+                    SwipeFrogAnimation(-1);
+
+                });
             }
 
             for (int i = 0; i < _greenButs.Count; i++)
@@ -96,6 +107,7 @@ public class Phone : MonoBehaviour
                 phoneButtons[_greenButs[i] - 1].onClick.AddListener(() =>
                 {
                     SwipeFrogAnimation(1);
+                    
                 });
             }
             
@@ -109,9 +121,22 @@ public class Phone : MonoBehaviour
 
     public void SwipeFrogAnimation(float direction)
     {
-        SwipeFrog(direction);
+        
         if (isSwiped) return;
+        SwipeFrog(direction);
+        currentFrogImage.sprite = nextFrogImage.sprite;
+        if (direction == 1)
+        {
+            MovePhone();
+            currentFrogImage.sprite = selectSprite;
+        }
+        else
+        {
+            ShakePhone();
+            currentFrogImage.sprite = skipSprite;
+        }
         isSwiped = true;
+        
         RectTransform rectTransform = currentFrogImage.rectTransform;
         
         Sequence seq = DOTween.Sequence();
@@ -124,6 +149,7 @@ public class Phone : MonoBehaviour
             currentFrogImage.rectTransform.localRotation = startRot;
             currentFrogImage.color = new Color(currentFrogImage.color.r, currentFrogImage.color.g, 
                 currentFrogImage.color.b, 1f);
+            currentFrogImage.sprite = nextFrogImage.sprite;
             
             isSwiped = false;
         });
@@ -131,21 +157,53 @@ public class Phone : MonoBehaviour
     private void SwipeFrog(float direction)
     {
         FrogManSO frogMan = TakeRandomFrog();
-        currentFrogImage.sprite = nextFrogImage.sprite;     
+        
+         
         nextFrogImage.sprite = frogMan.frogSprite;
+        
         if(direction == 1)
         {
             HandleStatBonus(frogMan);
-        
-            GameObject popup = PopupPool.Instance.Get();
-            popup.transform.position = statsTransform.position;
-        
-            PopupNumber popupNumber = popup.GetComponent<PopupNumber>();
-            Color color = Color.darkOliveGreen;
-            int stat = 10;
-            popupNumber.Play(stat.ToString(), color);    
+            ShowPopup(frogMan);
+               
+        }
+        else
+        {
+            
         }
         
+    }
+
+    private void ShowPopup(FrogManSO frogMan)
+    {
+        GameObject popupFood = PopupPool.Instance.Get();
+        GameObject popupHearths = PopupPool.Instance.Get();
+        GameObject popupArea =  PopupPool.Instance.Get();
+        
+        popupFood.transform.position = foodStatsTransform.position;
+        popupHearths.transform.position = hearthsStatsTransform.position;
+        popupArea.transform.position = popupHearths.transform.position;
+        
+        PopupNumber foodPopupNumber = popupFood.GetComponent<PopupNumber>();
+        PopupNumber hearthsPopupNumber = popupHearths.GetComponent<PopupNumber>();
+        PopupNumber areaPopupNumber = popupArea.GetComponent<PopupNumber>();
+        
+        foodPopupNumber.Play(frogMan.foodAmount.ToString(), IsPositive(frogMan.foodAmount)); 
+        hearthsPopupNumber.Play(frogMan.hearthAmount.ToString(), IsPositive(frogMan.hearthAmount)); 
+        areaPopupNumber.Play(frogMan.areaAmount.ToString(), IsPositive(frogMan.areaAmount)); 
+        
+    }
+
+    private Color IsPositive(int statAmount)
+    {
+        if (statAmount > 0)
+        {
+            return Color.greenYellow;
+        }
+        else
+        {
+            return Color.crimson;
+        }
     }
 
     private FrogManSO TakeRandomFrog()
@@ -161,4 +219,26 @@ public class Phone : MonoBehaviour
         stats.ChangeStats(frog);   
     }
 
+    private void ShakePhone()
+    {
+        phoneTransform.DOShakePosition(
+            duration: 0.3f,
+            strength: new Vector3(10f, 10f, 0f),
+            vibrato: 20,
+            randomness: 90,
+            snapping: false,
+            fadeOut: true
+        );
+    }
+
+    private void MovePhone()
+    {
+        Vector3 originalPos = phoneTransform.anchoredPosition3D;
+        phoneTransform.DOJump(
+            originalPos, 
+            jumpPower: 2f,
+            numJumps: 1,
+            duration: 1f
+        );
+    } 
 }
