@@ -721,6 +721,7 @@ MonoBehaviour:
   - {fileID: 1414697287}
   soundSlider: {fileID: 2126681855}
   beadsArea: {fileID: 1810417135}
+  audioMixer: {fileID: 0}
 --- !u!114 &390748512
 MonoBehaviour:
   m_ObjectHideFlags: 0
