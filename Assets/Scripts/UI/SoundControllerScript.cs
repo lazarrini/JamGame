@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class SoundControllerScript : MonoBehaviour, IDragHandler
 {
@@ -9,43 +11,138 @@ public class SoundControllerScript : MonoBehaviour, IDragHandler
     [SerializeField] private RectTransform soundSlider;
     [SerializeField] private RectTransform beadsArea;
 
+    [SerializeField] private AudioMixer audioMixer;
+
     private int maxVolumeLevel;
 
     private void Start()
     {
-        maxVolumeLevel = beads.Length - 1;
+        maxVolumeLevel = beads.Length;
         
         Debug.Log("Количество бусин: " + beads.Length);
         Debug.Log("Максимальный уровень: " + maxVolumeLevel);
     }
 
+
     public void OnDrag(PointerEventData eventData)
     {
-        Vector2 mousePosition;
+        float mouseX = eventData.position.x;
 
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            beadsArea,
-            eventData.position,
+        // Сначала получаем экранные X всех 11 позиций
+        float[] positions = new float[beads.Length + 1];
+
+        // Позиция 0 — центр первой бусины
+        positions[0] = RectTransformUtility.WorldToScreenPoint(
             eventData.pressEventCamera,
-            out mousePosition
+            beads[0].transform.position
+        ).x;
+
+        // Позиции 1-9 — между соседними бусинами
+        for (int i = 1; i < beads.Length; i++)
+        {
+            Vector3 leftBead = beads[i - 1].transform.position;
+            Vector3 rightBead = beads[i].transform.position;
+
+            Vector3 middle = Vector3.Lerp(
+                leftBead,
+                rightBead,
+                0.5f
             );
 
-        float firstBeadX = ((RectTransform)beads[0].transform).anchoredPosition.x;
-        float lastBeadX = ((RectTransform)beads[beads.Length - 1].transform).anchoredPosition.x;
+            positions[i] = RectTransformUtility.WorldToScreenPoint(
+                eventData.pressEventCamera,
+                middle
+            ).x;
+        }
 
-        float normalizedPosition = Mathf.InverseLerp(
-            firstBeadX, lastBeadX, mousePosition.x
+        // Позиция 10 — после последней бусины
+        Vector3 lastBead = beads[beads.Length - 1].transform.position;
+        Vector3 previousBead = beads[beads.Length - 2].transform.position;
+
+        Vector3 direction = lastBead - previousBead;
+
+        Vector3 afterLastBead = lastBead + direction * 0.5f;
+
+        positions[beads.Length] = RectTransformUtility.WorldToScreenPoint(
+            eventData.pressEventCamera,
+            afterLastBead
+        ).x;
+
+
+        // Ищем ближайшую позицию к курсору
+        int closestPosition = 0;
+        float closestDistance = Mathf.Infinity;
+
+        for (int i = 0; i < positions.Length; i++)
+        {
+            float distance = Mathf.Abs(
+                mouseX - positions[i]
             );
 
-        int newVolumeLevel = Mathf.RoundToInt(normalizedPosition * maxVolumeLevel);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestPosition = i;
+            }
+        }
 
-        volumeLevel = Mathf.Clamp(newVolumeLevel, 0, maxVolumeLevel);
+        volumeLevel = closestPosition;
 
-        RectTransform selectedBead = beads[volumeLevel].GetComponent<RectTransform>();
-        soundSlider.position = selectedBead.position;
+        MoveSlider();
+        UpdateBeads();
 
         Debug.Log("Уровень громкости: " + volumeLevel);
     }
+
+    private void MoveSlider()
+    {
+        // Позиция 0 — центр первой бусины
+        if (volumeLevel == 0)
+        {
+            soundSlider.position = beads[0].transform.position;
+            return;
+        }
+
+        // Позиция 10 — после последней бусины
+        if (volumeLevel == beads.Length)
+        {
+            Vector3 lastBead = beads[beads.Length - 1].transform.position;
+            Vector3 previousBead = beads[beads.Length - 2].transform.position;
+
+            Vector3 direction = lastBead - previousBead;
+
+            soundSlider.position = lastBead + direction * 0.5f;
+            return;
+        }
+
+        // Все остальные позиции — между соседними бусинами
+        Vector3 leftBead = beads[volumeLevel - 1].transform.position;
+        Vector3 rightBead = beads[volumeLevel].transform.position;
+
+        soundSlider.position = Vector3.Lerp(
+            leftBead,
+            rightBead,
+            0.5f
+        );
+    }
+
+    private void UpdateBeads()
+    {
+        for (int i = 0; i < beads.Length; i++)
+        {
+            Image beadImage = beads[i].GetComponent<Image>();
+
+            if (i < volumeLevel)
+            {
+                beadImage.enabled = true;
+            }
+            else
+            {
+                beadImage.enabled = false;
+            }
+        }
+    }
+
 
 
 }
