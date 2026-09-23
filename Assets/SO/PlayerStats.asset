@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d277cb03b9698cd4f86f8289410aa0b9, type: 3}
   m_Name: PlayerStats
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  food: 0
-  hearths: 0
-  area: 0
+  food: 9
+  hearths: 7

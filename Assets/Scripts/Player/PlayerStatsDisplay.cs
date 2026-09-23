@@ -29,10 +29,7 @@ public class PlayerStatsDisplay : MonoBehaviour
                 playerStats.OnHearthChanged += HandleChanged;
                 currentValue = playerStats.hearths;
                 break;
-            case StatType.Area:
-                playerStats.OnAreaChanged += HandleChanged;
-                currentValue = playerStats.area;
-                break;
+            
         }
 
         DrawInstant(currentValue);
@@ -44,7 +41,7 @@ public class PlayerStatsDisplay : MonoBehaviour
         {
             case StatType.Food: playerStats.OnFoodChanged -= HandleChanged; break;
             case StatType.Hearths: playerStats.OnHearthChanged -= HandleChanged; break;
-            case StatType.Area: playerStats.OnAreaChanged -= HandleChanged; break;
+            
         }
     }
 

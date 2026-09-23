@@ -6,6 +6,8 @@ using DG.Tweening;
 
 public class Phone : MonoBehaviour
 {
+    public FrogHarem frogHarem;
+    
     [SerializeField] private Button[] phoneButtons;
     [SerializeField] private int greenButCount;
     [SerializeField] private int redButCount;
@@ -15,6 +17,9 @@ public class Phone : MonoBehaviour
     [SerializeField] private Transform foodStatsTransform;
     [SerializeField] private Transform hearthsStatsTransform;
     [SerializeField] private Transform areaStatsTransform;
+    
+    
+    public event Action<FrogManSO> OnFrogAddedToHarem;
     
     public Sprite redSprite;
     public Sprite greenSprite;
@@ -38,15 +43,20 @@ public class Phone : MonoBehaviour
 
     private bool isSwiped;
 
+    private FrogManSO currentFrog;
+
     [SerializeField] private RectTransform phoneTransform;
     private void Awake()
     {
         timer = 0;
+
+        stats.food = 5;
+        stats.hearths = 0;
         
         startPos = currentFrogImage.rectTransform.anchoredPosition;
         startRot = currentFrogImage.rectTransform.localRotation;
 
-        TakeRandomFrog();
+        currentFrog = TakeRandomFrog();
     }
 
     private void ChooseButtonsIndexes()
@@ -96,7 +106,6 @@ public class Phone : MonoBehaviour
                 {
                     
                     SwipeFrogAnimation(-1);
-
                 });
             }
 
@@ -107,6 +116,7 @@ public class Phone : MonoBehaviour
                 phoneButtons[_greenButs[i] - 1].onClick.AddListener(() =>
                 {
                     SwipeFrogAnimation(1);
+                    
                     
                 });
             }
@@ -127,7 +137,7 @@ public class Phone : MonoBehaviour
         currentFrogImage.sprite = nextFrogImage.sprite;
         if (direction == 1)
         {
-            MovePhone();
+           
             currentFrogImage.sprite = selectSprite;
         }
         else
@@ -140,8 +150,8 @@ public class Phone : MonoBehaviour
         RectTransform rectTransform = currentFrogImage.rectTransform;
         
         Sequence seq = DOTween.Sequence();
-        seq.Append(rectTransform.DOAnchorPosX(rectTransform.anchoredPosition.x + 300f * direction, 1f).SetEase(Ease.OutElastic));
-        seq.Join(rectTransform.DORotate(new Vector3(0, 0, -15f * direction), 1f).SetEase(Ease.OutCubic));
+        seq.Append(rectTransform.DOAnchorPosX(rectTransform.anchoredPosition.x + 300f * -direction, 1f).SetEase(Ease.OutElastic));
+        seq.Join(rectTransform.DORotate(new Vector3(0, 0, -15f * -direction), 1f).SetEase(Ease.OutCubic));
         seq.Join(currentFrogImage.DOFade(0f, 1f));
         seq.OnComplete(() =>
         {
@@ -156,21 +166,19 @@ public class Phone : MonoBehaviour
     }
     private void SwipeFrog(float direction)
     {
-        FrogManSO frogMan = TakeRandomFrog();
-        
-         
-        nextFrogImage.sprite = frogMan.frogSprite;
         
         if(direction == 1)
         {
-            HandleStatBonus(frogMan);
-            ShowPopup(frogMan);
+            HandleStatBonus(currentFrog);
+            ShowPopup(currentFrog);
+            frogHarem.harem.Add(currentFrog);
+            OnFrogAddedToHarem?.Invoke(currentFrog);
                
         }
-        else
-        {
-            
-        }
+
+        currentFrog = TakeRandomFrog();
+        nextFrogImage.sprite = currentFrog.frogSprite;
+        
         
     }
 
@@ -178,19 +186,19 @@ public class Phone : MonoBehaviour
     {
         GameObject popupFood = PopupPool.Instance.Get();
         GameObject popupHearths = PopupPool.Instance.Get();
-        GameObject popupArea =  PopupPool.Instance.Get();
+     
         
         popupFood.transform.position = foodStatsTransform.position;
         popupHearths.transform.position = hearthsStatsTransform.position;
-        popupArea.transform.position = popupHearths.transform.position;
+  
         
         PopupNumber foodPopupNumber = popupFood.GetComponent<PopupNumber>();
         PopupNumber hearthsPopupNumber = popupHearths.GetComponent<PopupNumber>();
-        PopupNumber areaPopupNumber = popupArea.GetComponent<PopupNumber>();
+
         
         foodPopupNumber.Play(frogMan.foodAmount.ToString(), IsPositive(frogMan.foodAmount)); 
         hearthsPopupNumber.Play(frogMan.hearthAmount.ToString(), IsPositive(frogMan.hearthAmount)); 
-        areaPopupNumber.Play(frogMan.areaAmount.ToString(), IsPositive(frogMan.areaAmount)); 
+        
         
     }
 
@@ -210,6 +218,7 @@ public class Phone : MonoBehaviour
     {
         int randomIndex = UnityEngine.Random.Range(0, frogs.Length);
         var frog = frogs[randomIndex];
+        currentFrogImage.sprite = frog.frogSprite;
         return frog;
 
     }
@@ -233,12 +242,6 @@ public class Phone : MonoBehaviour
 
     private void MovePhone()
     {
-        Vector3 originalPos = phoneTransform.anchoredPosition3D;
-        phoneTransform.DOJump(
-            originalPos, 
-            jumpPower: 2f,
-            numJumps: 1,
-            duration: 1f
-        );
+        
     } 
 }
