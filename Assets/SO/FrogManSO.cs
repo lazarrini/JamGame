@@ -6,6 +6,13 @@ public class FrogManSO : ScriptableObject
     public Sprite frogSprite;
     public int foodAmount;
     public int hearthAmount;
-    public int areaAmount;
-    
+    public AreaType area;
+
+    public enum AreaType
+    {
+        None,
+        Swamp,
+        Dirt,
+        Forest
+    }
 }
