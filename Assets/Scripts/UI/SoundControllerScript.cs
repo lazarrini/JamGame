@@ -3,67 +3,185 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 
-public class SoundControllerScript : MonoBehaviour, IDragHandler
+public class SoundControllerScript : MonoBehaviour, IDragHandler, IPointerDownHandler
 {
-    [SerializeField] private int volumeLevel = 5;
+    // ===== МУЗЫКА =====
 
-    [SerializeField] private GameObject[] beads;
-    [SerializeField] private RectTransform soundSlider;
-    [SerializeField] private RectTransform beadsArea;
+    [SerializeField] private int musicVolumeLevel = 5;
+
+    [SerializeField] private GameObject[] musicBeads;
+    [SerializeField] private RectTransform musicSlider;
+
+
+    // ===== ЗВУКОВЫЕ ЭФФЕКТЫ =====
+
+    [SerializeField] private int sfxVolumeLevel = 5;
+
+    [SerializeField] private GameObject[] sfxBeads;
+    [SerializeField] private RectTransform sfxSlider;
+
+
+    // ===== AUDIO MIXER =====
 
     [SerializeField] private AudioMixer audioMixer;
 
-    private int maxVolumeLevel;
+    // Имена параметров должны совпадать с теми,
+    // что "экспонированы" (Exposed) в AudioMixer в Unity
+    [SerializeField] private string musicVolumeParam = "MusicVolume";
+    [SerializeField] private string sfxVolumeParam = "SFXVolume";
+
+    // Громкость при уровне 0 (полная тишина)
+    private const float MinVolumeDb = -80f;
+
+    // Ключи для сохранения настроек между запусками игры
+    private const string MusicPrefsKey = "MusicVolumeLevel";
+    private const string SfxPrefsKey = "SfxVolumeLevel";
+
+
+    // true = двигаем музыку
+    // false = двигаем звуковые эффекты
+    private bool isMusicSlider;
+
 
     private void Start()
     {
-        maxVolumeLevel = beads.Length;
-        
-        Debug.Log("Количество бусин: " + beads.Length);
-        Debug.Log("Максимальный уровень: " + maxVolumeLevel);
+        // Подгружаем сохранённые уровни, если они есть,
+        // иначе остаёмся на значениях из инспектора
+        musicVolumeLevel = PlayerPrefs.GetInt(MusicPrefsKey, musicVolumeLevel);
+        sfxVolumeLevel = PlayerPrefs.GetInt(SfxPrefsKey, sfxVolumeLevel);
+
+        // Ставим оба слайдера в начальные позиции
+        MoveSlider(musicBeads, musicSlider, musicVolumeLevel);
+        MoveSlider(sfxBeads, sfxSlider, sfxVolumeLevel);
+
+        // Показываем нужное количество бусин
+        UpdateBeads(musicBeads, musicVolumeLevel);
+        UpdateBeads(sfxBeads, sfxVolumeLevel);
+
+        // Применяем громкость к AudioMixer сразу при старте
+        ApplyVolumeToMixer(musicVolumeParam, musicVolumeLevel, musicBeads.Length);
+        ApplyVolumeToMixer(sfxVolumeParam, sfxVolumeLevel, sfxBeads.Length);
     }
 
 
+    // Вызывается для музыкального слайдера
+    public void SetMusicSlider()
+    {
+        isMusicSlider = true;
+    }
+
+
+    // Вызывается для слайдера звуковых эффектов
+    public void SetSfxSlider()
+    {
+        isMusicSlider = false;
+    }
+
+
+    // Клик сразу по треку слайдера (без перетаскивания)
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        UpdateActiveSlider(eventData);
+    }
+
+
+    // Перетаскивание слайдера
     public void OnDrag(PointerEventData eventData)
+    {
+        UpdateActiveSlider(eventData);
+    }
+
+
+    // Общая логика для клика и перетаскивания
+    private void UpdateActiveSlider(PointerEventData eventData)
+    {
+        GameObject[] currentBeads;
+        RectTransform currentSlider;
+        string mixerParam;
+
+        if (isMusicSlider)
+        {
+            currentBeads = musicBeads;
+            currentSlider = musicSlider;
+            mixerParam = musicVolumeParam;
+        }
+        else
+        {
+            currentBeads = sfxBeads;
+            currentSlider = sfxSlider;
+            mixerParam = sfxVolumeParam;
+        }
+
+        if (currentBeads == null || currentBeads.Length < 2)
+        {
+            Debug.LogWarning("Нужно минимум 2 бусины для корректной работы слайдера.");
+            return;
+        }
+
+        int closestPosition = GetClosestPosition(eventData, currentBeads);
+
+        if (isMusicSlider)
+        {
+            musicVolumeLevel = closestPosition;
+        }
+        else
+        {
+            sfxVolumeLevel = closestPosition;
+        }
+
+        // Передвигаем ползунок
+        MoveSlider(currentBeads, currentSlider, closestPosition);
+
+        // Показываем/скрываем бусины
+        UpdateBeads(currentBeads, closestPosition);
+
+        // Реально меняем громкость в AudioMixer
+        ApplyVolumeToMixer(mixerParam, closestPosition, currentBeads.Length);
+
+        // Сохраняем выбор игрока
+        SaveVolumeLevel();
+
+        Debug.Log((isMusicSlider ? "Музыка" : "Эффекты") + ", уровень громкости: " + closestPosition);
+    }
+
+
+    // Находит ближайшую к курсору позицию среди бусин
+    private int GetClosestPosition(PointerEventData eventData, GameObject[] currentBeads)
     {
         float mouseX = eventData.position.x;
 
-        // Сначала получаем экранные X всех 11 позиций
-        float[] positions = new float[beads.Length + 1];
+        // Всего positions.Length позиций:
+        // 0 — центр первой бусины
+        // 1..N-1 — между бусинами
+        // N — после последней бусины
+        float[] positions = new float[currentBeads.Length + 1];
 
         // Позиция 0 — центр первой бусины
         positions[0] = RectTransformUtility.WorldToScreenPoint(
             eventData.pressEventCamera,
-            beads[0].transform.position
+            currentBeads[0].transform.position
         ).x;
 
-        // Позиции 1-9 — между соседними бусинами
-        for (int i = 1; i < beads.Length; i++)
+        // Позиции между бусинами
+        for (int i = 1; i < currentBeads.Length; i++)
         {
-            Vector3 leftBead = beads[i - 1].transform.position;
-            Vector3 rightBead = beads[i].transform.position;
-
-            Vector3 middle = Vector3.Lerp(
-                leftBead,
-                rightBead,
-                0.5f
-            );
-
+            Vector3 leftBead = currentBeads[i - 1].transform.position;
+            Vector3 rightBead = currentBeads[i].transform.position;
+            Vector3 middle = Vector3.Lerp(leftBead, rightBead, 0.5f);
             positions[i] = RectTransformUtility.WorldToScreenPoint(
                 eventData.pressEventCamera,
                 middle
             ).x;
         }
 
-        // Позиция 10 — после последней бусины
-        Vector3 lastBead = beads[beads.Length - 1].transform.position;
-        Vector3 previousBead = beads[beads.Length - 2].transform.position;
-
+        // Последняя позиция — после последней бусины
+        Vector3 lastBead = currentBeads[currentBeads.Length - 1].transform.position;
+        Vector3 previousBead = currentBeads[currentBeads.Length - 2].transform.position;
         Vector3 direction = lastBead - previousBead;
 
         Vector3 afterLastBead = lastBead + direction * 0.5f;
 
-        positions[beads.Length] = RectTransformUtility.WorldToScreenPoint(
+        positions[currentBeads.Length] = RectTransformUtility.WorldToScreenPoint(
             eventData.pressEventCamera,
             afterLastBead
         ).x;
@@ -75,9 +193,7 @@ public class SoundControllerScript : MonoBehaviour, IDragHandler
 
         for (int i = 0; i < positions.Length; i++)
         {
-            float distance = Mathf.Abs(
-                mouseX - positions[i]
-            );
+            float distance = Mathf.Abs(mouseX - positions[i]);
 
             if (distance < closestDistance)
             {
@@ -86,63 +202,82 @@ public class SoundControllerScript : MonoBehaviour, IDragHandler
             }
         }
 
-        volumeLevel = closestPosition;
-
-        MoveSlider();
-        UpdateBeads();
-
-        Debug.Log("Уровень громкости: " + volumeLevel);
+        return closestPosition;
     }
 
-    private void MoveSlider()
+
+    // Переводит уровень (0..maxLevel) в децибелы и применяет к AudioMixer
+    private void ApplyVolumeToMixer(string parameterName, int level, int maxLevel)
+    {
+        if (audioMixer == null || string.IsNullOrEmpty(parameterName))
+        {
+            return;
+        }
+
+        float volumeDb;
+
+        if (level <= 0)
+        {
+            // Уровень 0 — полная тишина
+            volumeDb = MinVolumeDb;
+        }
+        else
+        {
+            // Громкость линейна по уровню, но AudioMixer работает в децибелах,
+            // поэтому переводим через логарифм (иначе средние деления
+            // будут звучать намного тише, чем кажется на глаз)
+            float normalized = (float)level / maxLevel;
+            volumeDb = Mathf.Log10(normalized) * 20f;
+        }
+
+        audioMixer.SetFloat(parameterName, volumeDb);
+    }
+
+    // Сохраняет текущие уровни громкости на диск
+    private void SaveVolumeLevel()
+    {
+        PlayerPrefs.SetInt(MusicPrefsKey, musicVolumeLevel);
+        PlayerPrefs.SetInt(SfxPrefsKey, sfxVolumeLevel);
+        PlayerPrefs.Save();
+    }
+
+
+    // Передвигает конкретный слайдер
+    private void MoveSlider(GameObject[] currentBeads, RectTransform currentSlider, int volumeLevel)
     {
         // Позиция 0 — центр первой бусины
         if (volumeLevel == 0)
         {
-            soundSlider.position = beads[0].transform.position;
+            currentSlider.position = currentBeads[0].transform.position;
             return;
         }
 
-        // Позиция 10 — после последней бусины
-        if (volumeLevel == beads.Length)
+        // Последняя позиция — после последней бусины
+        if (volumeLevel == currentBeads.Length)
         {
-            Vector3 lastBead = beads[beads.Length - 1].transform.position;
-            Vector3 previousBead = beads[beads.Length - 2].transform.position;
-
+            Vector3 lastBead = currentBeads[currentBeads.Length - 1].transform.position;
+            Vector3 previousBead = currentBeads[currentBeads.Length - 2].transform.position;
             Vector3 direction = lastBead - previousBead;
 
-            soundSlider.position = lastBead + direction * 0.5f;
+            currentSlider.position = lastBead + direction * 0.5f;
             return;
         }
 
-        // Все остальные позиции — между соседними бусинами
-        Vector3 leftBead = beads[volumeLevel - 1].transform.position;
-        Vector3 rightBead = beads[volumeLevel].transform.position;
+        // Все остальные позиции — между бусинами
+        Vector3 leftBead = currentBeads[volumeLevel - 1].transform.position;
+        Vector3 rightBead = currentBeads[volumeLevel].transform.position;
 
-        soundSlider.position = Vector3.Lerp(
-            leftBead,
-            rightBead,
-            0.5f
-        );
+        currentSlider.position = Vector3.Lerp(leftBead, rightBead, 0.5f);
     }
 
-    private void UpdateBeads()
+    // Показывает только заполненные бусины
+    private void UpdateBeads(GameObject[] currentBeads, int volumeLevel)
     {
-        for (int i = 0; i < beads.Length; i++)
+        for (int i = 0; i < currentBeads.Length; i++)
         {
-            Image beadImage = beads[i].GetComponent<Image>();
-
-            if (i < volumeLevel)
-            {
-                beadImage.enabled = true;
-            }
-            else
-            {
-                beadImage.enabled = false;
-            }
+            Image beadImage = currentBeads[i].GetComponent<Image>();
+            beadImage.enabled = i < volumeLevel;
         }
     }
-
-
 
 }
