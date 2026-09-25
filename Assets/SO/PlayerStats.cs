@@ -10,8 +10,14 @@ public class PlayerStats : ScriptableObject
 
     public event Action<int> OnFoodChanged;
     public event Action<int> OnHearthChanged;
-   
-    
+
+    public void SetupStats(int foodAmount, int hearthAmount)
+    {
+        food = foodAmount;
+        hearths = hearthAmount;
+        OnFoodChanged?.Invoke(food);
+        OnHearthChanged?.Invoke(hearths);
+    }
 
     public void ChangeFood(int amount)
     {
