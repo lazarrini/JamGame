@@ -53,15 +53,23 @@ public class Phone : MonoBehaviour
         stats.food = 5;
         stats.hearths = 0;
         
+        
+        
         startPos = currentFrogImage.rectTransform.anchoredPosition;
         startRot = currentFrogImage.rectTransform.localRotation;
 
         currentFrog = TakeRandomFrog();
         
+        
         RandomActivateButtons();
         
     }
 
+    private void Start()
+    {
+        stats.SetupStats(5, 0);
+    }
+    
     private void ChooseButtonsIndexes()
     {
         List<int> pool = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };

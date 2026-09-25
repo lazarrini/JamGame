@@ -10,7 +10,7 @@ public class PlayerStatsDisplay : MonoBehaviour
     [SerializeField] private StatType statType;
 
     [Header("5 ячеек, по порядку слева направо")]
-    [SerializeField] private Image[] cells; // размер 5
+    [SerializeField] private Image[] cells; 
 
     [SerializeField] private Color filledColor = Color.white;
     [SerializeField] private Color emptyColor = new Color(1, 1, 1, 0.2f);
@@ -31,7 +31,8 @@ public class PlayerStatsDisplay : MonoBehaviour
                 break;
             
         }
-
+        
+        
         
     }
 
@@ -48,6 +49,7 @@ public class PlayerStatsDisplay : MonoBehaviour
     private void HandleChanged(int newValue)
     {
         //AnimateChange(currentValue, newValue);
+        
         DrawInstant(newValue);
         currentValue = newValue;   
     }
