@@ -10,6 +10,10 @@ public class FrogHaremDisplay : MonoBehaviour
     
     public List<FrogSlot> _frogSlots = new List<FrogSlot>();
 
+    [SerializeField] private FrogHarem harem;
+
+    [SerializeField] private PopupWaring fullHaremPopup; 
+
 
     private void OnEnable()
     {
@@ -22,10 +26,20 @@ public class FrogHaremDisplay : MonoBehaviour
     }
 
     private void UpdateHaremList(FrogManSO frog)
+    
     {
+        if (_frogSlots.Count == harem.HaremSize)
+        {
+            fullHaremPopup.gameObject.SetActive(true);
+            fullHaremPopup.Play();
+            return;
+        }
+            
+        
         FrogSlot slot = Instantiate(frogSlotPrefab, haremList);
         slot.foodBonus.text = frog.foodAmount.ToString();
         slot.slotImage.sprite = frog.frogSprite;
+        slot.foodFillBar.fillAmount = 0;
         slot.isHungry = frog.isHungry;
         _frogSlots.Add(slot);
         

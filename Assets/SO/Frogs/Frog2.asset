@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Frog2
   m_EditorClassIdentifier: Assembly-CSharp::FrogManSO
   frogSprite: {fileID: 21300000, guid: 67db57309d7b29042903fabba7f731f9, type: 3}
-  foodAmount: -2
+  foodAmount: -3
   hearthAmount: 3
   area: 0
   isHungry: 1

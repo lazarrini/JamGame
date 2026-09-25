@@ -4,13 +4,22 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using DG.Tweening;
 
+public enum ResourceType
+{
+    Raindrop,
+    Leaf,
+    Stone
+}
+
 public class Phone : MonoBehaviour
 {
+    
     public FrogHarem frogHarem;
     
     [SerializeField] private Button[] phoneButtons;
     [SerializeField] private int greenButCount;
     [SerializeField] private int redButCount;
+    [SerializeField] private int areaButCount;
 
     [SerializeField] private PlayerStats stats;
 
@@ -26,7 +35,10 @@ public class Phone : MonoBehaviour
     public Sprite graySprite;
     public Sprite skipSprite;
     public Sprite selectSprite;
-
+    public Sprite leafButtonSprite;
+    public Sprite stoneButtonSprite;
+    public Sprite raindropButtonSprite;
+    
     public Image currentFrogImage;
     public Image nextFrogImage;
 
@@ -34,7 +46,13 @@ public class Phone : MonoBehaviour
     
     
     private float timer = 0;
+    private float chargeTimer = 0;
 
+
+    private int leafButtonIndex;
+    private int stoneButtonIndex;
+    private int raindropButtonIndex;
+    
     private List<int> _greenButs = new List<int>();
     private List<int> _redButs = new List<int>();
     
@@ -46,9 +64,16 @@ public class Phone : MonoBehaviour
     private FrogManSO currentFrog;
 
     [SerializeField] private RectTransform phoneTransform;
+
+    public int leafCount;
     private void Awake()
     {
+        leafCount = 0;
+        
+        
+        
         timer = 0;
+        chargeTimer = 0;
 
         stats.food = 5;
         stats.hearths = 0;
@@ -79,6 +104,11 @@ public class Phone : MonoBehaviour
             (pool[i], pool[j]) = (pool[j], pool[i]);
             
         }
+
+        leafButtonIndex = pool[pool.Count - 1];
+        stoneButtonIndex = pool[pool.Count - 2];
+        raindropButtonIndex = pool[pool.Count - 3];
+        
         
         for (int g = 0; g < greenButCount; g++)
         {
@@ -91,6 +121,7 @@ public class Phone : MonoBehaviour
             _redButs.Add(pool[r]);
             
         }
+        
 
         
         
@@ -99,10 +130,12 @@ public class Phone : MonoBehaviour
     {
         
         timer += Time.deltaTime;
+        chargeTimer += Time.deltaTime;
+        
         if (timer > 1f)
         {
-            float randNum = UnityEngine.Random.Range(0, 2);
-            if (randNum >= 1)
+            float randNum = UnityEngine.Random.Range(0, 3);
+            if (randNum >= 0)
             {
                 RandomActivateButtons();
             }
@@ -111,16 +144,19 @@ public class Phone : MonoBehaviour
             timer = 0;
         }
         
+        
+        
+    }
+
+    private void AddResourceToInventory(ResourceType resourceType)
+    {
+        Debug.Log("добавился " + resourceType);
     }
 
     private void RandomActivateButtons()
     {
         ChooseButtonsIndexes();
-        foreach (Button but in phoneButtons)
-        {
-            but.gameObject.GetComponent<Image>().sprite = graySprite;
-            but.onClick.RemoveAllListeners();
-        }
+        DeactivateButtons();
             
         for (int i = 0; i < _redButs.Count; i++)
         {
@@ -130,6 +166,7 @@ public class Phone : MonoBehaviour
             {
                     
                 SwipeFrogAnimation(-1);
+                DeactivateButtons();
             });
         }
 
@@ -140,13 +177,52 @@ public class Phone : MonoBehaviour
             phoneButtons[_greenButs[i] - 1].onClick.AddListener(() =>
             {
                 SwipeFrogAnimation(1);
-                    
+                DeactivateButtons();
                     
             });
         }
+        
+
+        phoneButtons[leafButtonIndex].gameObject.GetComponent<Image>().sprite = leafButtonSprite;
+        phoneButtons[stoneButtonIndex].gameObject.GetComponent<Image>().sprite = stoneButtonSprite;
+        phoneButtons[raindropButtonIndex].gameObject.GetComponent<Image>().sprite = raindropButtonSprite;
+    
+        phoneButtons[leafButtonIndex].onClick.AddListener(() =>
+        {
+                
+            DeactivateButtons();
+            AddResourceToInventory(ResourceType.Leaf);
+                    
+        });
+        phoneButtons[stoneButtonIndex].onClick.AddListener(() =>
+        {
+                
+            DeactivateButtons();
+            AddResourceToInventory(ResourceType.Stone);
+                    
+        });
+        phoneButtons[raindropButtonIndex].onClick.AddListener(() =>
+        {
+                
+            DeactivateButtons();
+            AddResourceToInventory(ResourceType.Raindrop);
+                    
+        });
+        
+        
             
         _redButs.Clear();
         _greenButs.Clear();
+        
+    }
+
+    private void DeactivateButtons()
+    {
+        foreach (Button but in phoneButtons)
+        {
+            but.gameObject.GetComponent<Image>().sprite = graySprite;
+            but.onClick.RemoveAllListeners();
+        }
     }
 
     public void SwipeFrogAnimation(float direction)
