@@ -57,11 +57,14 @@ public class Phone : MonoBehaviour
         startRot = currentFrogImage.rectTransform.localRotation;
 
         currentFrog = TakeRandomFrog();
+        
+        RandomActivateButtons();
+        
     }
 
     private void ChooseButtonsIndexes()
     {
-        List<int> pool = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        List<int> pool = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
         for (int i = pool.Count - 1; i > 0; i--)
         {
             int j = UnityEngine.Random.Range(0, i + 1);
@@ -88,45 +91,54 @@ public class Phone : MonoBehaviour
     {
         
         timer += Time.deltaTime;
-        if (timer > 2f)
+        if (timer > 1f)
         {
-            
-            ChooseButtonsIndexes();
-            foreach (Button but in phoneButtons)
+            float randNum = UnityEngine.Random.Range(0, 2);
+            if (randNum >= 1)
             {
-                but.gameObject.GetComponent<Image>().sprite = graySprite;
-                but.onClick.RemoveAllListeners();
+                RandomActivateButtons();
             }
-            
-            for (int i = 0; i < _redButs.Count; i++)
-            {
                 
-                phoneButtons[_redButs[i] - 1].gameObject.GetComponent<Image>().sprite = redSprite;
-                phoneButtons[_redButs[i] - 1].onClick.AddListener(() =>
-                {
-                    
-                    SwipeFrogAnimation(-1);
-                });
-            }
-
-            for (int i = 0; i < _greenButs.Count; i++)
-            {
-
-                phoneButtons[_greenButs[i] - 1].gameObject.GetComponent<Image>().sprite = greenSprite;
-                phoneButtons[_greenButs[i] - 1].onClick.AddListener(() =>
-                {
-                    SwipeFrogAnimation(1);
-                    
-                    
-                });
-            }
             
-            _redButs.Clear();
-            _greenButs.Clear();
-
             timer = 0;
         }
         
+    }
+
+    private void RandomActivateButtons()
+    {
+        ChooseButtonsIndexes();
+        foreach (Button but in phoneButtons)
+        {
+            but.gameObject.GetComponent<Image>().sprite = graySprite;
+            but.onClick.RemoveAllListeners();
+        }
+            
+        for (int i = 0; i < _redButs.Count; i++)
+        {
+                
+            phoneButtons[_redButs[i] - 1].gameObject.GetComponent<Image>().sprite = redSprite;
+            phoneButtons[_redButs[i] - 1].onClick.AddListener(() =>
+            {
+                    
+                SwipeFrogAnimation(-1);
+            });
+        }
+
+        for (int i = 0; i < _greenButs.Count; i++)
+        {
+
+            phoneButtons[_greenButs[i] - 1].gameObject.GetComponent<Image>().sprite = greenSprite;
+            phoneButtons[_greenButs[i] - 1].onClick.AddListener(() =>
+            {
+                SwipeFrogAnimation(1);
+                    
+                    
+            });
+        }
+            
+        _redButs.Clear();
+        _greenButs.Clear();
     }
 
     public void SwipeFrogAnimation(float direction)
@@ -169,8 +181,7 @@ public class Phone : MonoBehaviour
         
         if(direction == 1)
         {
-            HandleStatBonus(currentFrog);
-            ShowPopup(currentFrog);
+            
             frogHarem.harem.Add(currentFrog);
             OnFrogAddedToHarem?.Invoke(currentFrog);
                
@@ -182,7 +193,7 @@ public class Phone : MonoBehaviour
         
     }
 
-    private void ShowPopup(FrogManSO frogMan)
+    public void ShowPopup(FrogManSO frogMan)
     {
         GameObject popupFood = PopupPool.Instance.Get();
         GameObject popupHearths = PopupPool.Instance.Get();

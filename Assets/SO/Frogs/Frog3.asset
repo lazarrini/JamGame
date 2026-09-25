@@ -16,3 +16,4 @@ MonoBehaviour:
   foodAmount: -1
   hearthAmount: 1
   area: 0
+  isHungry: 1

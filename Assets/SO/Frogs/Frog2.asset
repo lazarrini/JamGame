@@ -15,4 +15,5 @@ MonoBehaviour:
   frogSprite: {fileID: 8688989734150688896, guid: 215c63f67b746d9419678d65c25c255b, type: 3}
   foodAmount: -2
   hearthAmount: 3
-  areaAmount: 0
+  area: 0
+  isHungry: 1
