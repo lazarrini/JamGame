@@ -32,7 +32,7 @@ public class PlayerStatsDisplay : MonoBehaviour
             
         }
 
-        DrawInstant(currentValue);
+        
     }
 
     private void OnDisable()
@@ -47,14 +47,16 @@ public class PlayerStatsDisplay : MonoBehaviour
 
     private void HandleChanged(int newValue)
     {
-        AnimateChange(currentValue, newValue);
-        currentValue = newValue;
+        //AnimateChange(currentValue, newValue);
+        DrawInstant(newValue);
+        currentValue = newValue;   
     }
 
     private void DrawInstant(int value)
     {
         for (int i = 0; i < cells.Length; i++)
             cells[i].color = i < value ? filledColor : emptyColor;
+        
     }
 
     private void AnimateChange(int from, int to)

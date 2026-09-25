@@ -23,7 +23,7 @@ public class PopupNumber : MonoBehaviour
         text.color = textColor;
         _rt.localScale = Vector3.zero;
         Vector3 startPos = _rt.position;
-        Vector3 randomOffset = new Vector3(UnityEngine.Random.Range(-30, 30), 0, 0);
+        Vector3 randomOffset = new Vector3(UnityEngine.Random.Range(-300, 300), 0, 0);
 
         Sequence seq = DOTween.Sequence();
 

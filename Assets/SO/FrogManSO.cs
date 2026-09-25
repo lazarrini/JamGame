@@ -7,6 +7,7 @@ public class FrogManSO : ScriptableObject
     public int foodAmount;
     public int hearthAmount;
     public AreaType area;
+    public bool isHungry;
 
     public enum AreaType
     {
