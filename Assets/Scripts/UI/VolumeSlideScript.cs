@@ -3,12 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 
-// Этот компонент отвечает ТОЛЬКО за один слайдер.
-// Повесь его на зону музыки — настрой поля под музыку.
-// Повесь его же (второй экземпляр) на зону эффектов — настрой поля под эффекты.
-// Зона (RectTransform с Image, Raycast Target = true) должна покрывать
-// область именно ЭТОГО слайдера, от первой до последней бусины,
-// и НЕ пересекаться с зоной другого слайдера.
+
 public class VolumeSliderScript : MonoBehaviour, IDragHandler, IPointerDownHandler
 {
     [SerializeField] private int volumeLevel = 5;
