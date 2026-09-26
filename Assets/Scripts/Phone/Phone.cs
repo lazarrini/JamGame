@@ -156,7 +156,7 @@ public class Phone : MonoBehaviour
     private void RandomActivateButtons()
     {
         ChooseButtonsIndexes();
-        DeactivateButtons();
+        
             
         for (int i = 0; i < _redButs.Count; i++)
         {
