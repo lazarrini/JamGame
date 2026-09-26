@@ -4,8 +4,8 @@ using UnityEngine.SceneManagement;
 public class CutsceneController : MonoBehaviour
 {
     [SerializeField] private GameObject[] images;
+    [SerializeField] private CutsceneSoundGroup[] soundGroups;
     [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip changeSound;
     [SerializeField] private string nextSceneName = "Game"; //поменять по индексу
 
     private int currentImage = 0;
@@ -25,6 +25,11 @@ public class CutsceneController : MonoBehaviour
 
     private void NextImage()
     {
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
+
         currentImage++;
 
         if (currentImage >= images.Length)
@@ -43,9 +48,9 @@ public class CutsceneController : MonoBehaviour
             images[i].SetActive(i == index);
         }
 
-        if (audioSource != null && changeSound != null)
+        if (index < soundGroups.Length && soundGroups[index] != null)
         {
-            audioSource.PlayOneShot(changeSound);
+            soundGroups[index].PlaySounds(audioSource);
         }
 
     }
