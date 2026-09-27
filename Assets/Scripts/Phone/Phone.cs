@@ -77,16 +77,24 @@ public class Phone : MonoBehaviour
 
     [SerializeField] private RectTransform phoneTransform;
 
+    private float chargeParam;
+    private float chargeInterval;
+    private float chargeFixed;
+    
     public int leafCount;
     private void Awake()
     {
         leafCount = 0;
         gameIsOver = false;
 
-        chargeText.text = "100";
+        chargeParam = 100f;
+        chargeText.text = chargeParam.ToString();
         
         timer = 0;
-        chargeTimer = 90;
+        chargeTimer = 100;
+        chargeInterval = 5;
+        
+        
 
         stats.food = 5;
         stats.hearths = 0;
@@ -160,9 +168,28 @@ public class Phone : MonoBehaviour
             timer = 0;
         }
 
-        if (chargeTimer % 10 == 0)
+        
+        if (chargeTimer <= (chargeParam - chargeInterval))
         {
-            chargeText.text = chargeTimer.ToString();
+            
+            chargeText.text = chargeParam.ToString() + "%";
+            if (chargeParam == 80f)
+            {
+                chargeImage.sprite = charge45Sprite;
+            }
+            else if (chargeParam == 60f)
+            {
+                chargeImage.sprite = charge35Sprite;
+            }
+            else if (chargeParam == 40f)
+            {
+                chargeImage.sprite = charge25Sprite;
+            }
+            else if (chargeParam == 20f)
+            {
+                chargeImage.sprite = charge15Sprite;
+            }
+            chargeParam -= chargeInterval;
         }
         
         if(chargeTimer <= 0)
