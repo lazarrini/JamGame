@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 189793d57094915498277521354ac35e, type: 3}
-  m_Name: Frog4
+  m_Name: Frog10
   m_EditorClassIdentifier: Assembly-CSharp::FrogManSO
-  frogSprite: {fileID: 21300000, guid: b539c4454367b394e9e383ad1e5c84c4, type: 3}
-  foodAmount: -1
-  hearthAmount: 1
+  frogSprite: {fileID: -2199581003797156570, guid: cb0b1efe9fdefd942ba5427750f98e1c, type: 3}
+  foodAmount: -2
+  hearthAmount: 2
   area: 1
   isHungry: 1
