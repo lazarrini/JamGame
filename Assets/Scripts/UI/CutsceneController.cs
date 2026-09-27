@@ -6,7 +6,7 @@ public class CutsceneController : MonoBehaviour
     [SerializeField] private GameObject[] images;
     [SerializeField] private CutsceneSoundGroup[] soundGroups;
     [SerializeField] private AudioSource audioSource;
-    [SerializeField] private string nextSceneName = "Game"; //поменять по индексу
+    [SerializeField] private int nextSceneIndex = 2; //поменять по индексу
 
     private int currentImage = 0;
 
@@ -34,7 +34,7 @@ public class CutsceneController : MonoBehaviour
 
         if (currentImage >= images.Length)
         {
-            SceneManager.LoadScene(nextSceneName);
+            SceneManager.LoadScene(nextSceneIndex);
             return;
         }
 
