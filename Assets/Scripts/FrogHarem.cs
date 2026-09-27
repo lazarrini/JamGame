@@ -10,22 +10,27 @@ public class FrogHarem : MonoBehaviour
     [SerializeField] private PlayerStats playerStats;
     public int HaremSize = 6;
     private float _timer;
-
+    
     [SerializeField] private FrogHaremDisplay haremDisplay;
     private void Update()
     {
-        
-        foreach (var frog in haremDisplay._frogSlots)
+        if (haremDisplay._frogSlots.Count != 0)
         {
-            frog.foodFillBar.fillAmount += 0.3f * Time.deltaTime;
-            if (frog.foodFillBar.fillAmount >= 1f)
+            for (int i = 0; i < haremDisplay._frogSlots.Count; i++)
             {
-                ChangeFoodParameter();
-                ChangeHearthsParameter();
-                FoodIsOverCheck();
-                frog.foodFillBar.fillAmount = 0f;
+                haremDisplay._frogSlots[i].foodFillBar.fillAmount += 0.1f * Time.deltaTime;
+                if (haremDisplay._frogSlots[i].foodFillBar.fillAmount >= 1f)
+                {
+                    ChangeFoodParameter();
+                    ChangeHearthsParameter();
+                    haremDisplay._frogSlots[i].foodFillBar.fillAmount = 0f;
+                    FoodIsOverCheck();
+                    
+                }
             }
+           
         }
+        
         
         
     }
@@ -53,22 +58,22 @@ public class FrogHarem : MonoBehaviour
 
     private void ChangeFoodParameter()
     {
-        foreach (var frog in harem)
+        for (int i = 0; i < harem.Count; i++)
         {
-            playerStats.ChangeFood(frog.foodAmount);
-            phone.ShowPopup(frog);
+            playerStats.ChangeFood(harem[i].foodAmount);
+            phone.ShowPopup(harem[i]);
             FoodIsOverCheck();
-
         }
+        
     }
 
     private void ChangeHearthsParameter()
     {
-        foreach (var frog in harem)
+        for (int i = 0; i < harem.Count; i++)
         {
-            playerStats.ChangeHearths(frog.foodAmount);
-            phone.ShowPopup(frog);
-                
+            playerStats.ChangeFood(harem[i].foodAmount);
+            phone.ShowPopup(harem[i]);
+            FoodIsOverCheck();
         }
     }
 }

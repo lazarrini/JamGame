@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 
 public enum ResourceType
 {
@@ -13,7 +14,8 @@ public enum ResourceType
 
 public class Phone : MonoBehaviour
 {
-    
+
+    public bool gameIsOver;
     public FrogHarem frogHarem;
     
     [SerializeField] private Button[] phoneButtons;
@@ -38,12 +40,22 @@ public class Phone : MonoBehaviour
     public Sprite leafButtonSprite;
     public Sprite stoneButtonSprite;
     public Sprite raindropButtonSprite;
-    
+
+    public Sprite gameOverScreenSprite;
     public Image currentFrogImage;
     public Image nextFrogImage;
 
     [SerializeField] private FrogManSO[] frogs;
     
+    
+    public Sprite chargeFullSprite;
+    public Sprite charge45Sprite;
+    public Sprite charge35Sprite;
+    public Sprite charge25Sprite;
+    public Sprite charge15Sprite;
+    public Sprite chargeOverSprite;
+    public Image chargeImage;
+    public TextMeshProUGUI chargeText;
     
     private float timer = 0;
     private float chargeTimer = 0;
@@ -65,15 +77,24 @@ public class Phone : MonoBehaviour
 
     [SerializeField] private RectTransform phoneTransform;
 
+    private float chargeParam;
+    private float chargeInterval;
+    private float chargeFixed;
+    
     public int leafCount;
     private void Awake()
     {
         leafCount = 0;
-        
-        
+        gameIsOver = false;
+
+        chargeParam = 100f;
+        chargeText.text = chargeParam.ToString();
         
         timer = 0;
-        chargeTimer = 0;
+        chargeTimer = 100;
+        chargeInterval = 5;
+        
+        
 
         stats.food = 5;
         stats.hearths = 0;
@@ -128,9 +149,12 @@ public class Phone : MonoBehaviour
     }
     private void Update()
     {
+        if(!gameIsOver)
+        {
+            timer += Time.deltaTime;
+            chargeTimer -= Time.deltaTime;
+        }
         
-        timer += Time.deltaTime;
-        chargeTimer += Time.deltaTime;
         
         if (timer > 1f)
         {
@@ -143,6 +167,39 @@ public class Phone : MonoBehaviour
             
             timer = 0;
         }
+
+        
+        if (chargeTimer <= (chargeParam - chargeInterval))
+        {
+            
+            chargeText.text = chargeParam.ToString() + "%";
+            if (chargeParam == 80f)
+            {
+                chargeImage.sprite = charge45Sprite;
+            }
+            else if (chargeParam == 60f)
+            {
+                chargeImage.sprite = charge35Sprite;
+            }
+            else if (chargeParam == 40f)
+            {
+                chargeImage.sprite = charge25Sprite;
+            }
+            else if (chargeParam == 20f)
+            {
+                chargeImage.sprite = charge15Sprite;
+            }
+            chargeParam -= chargeInterval;
+        }
+        
+        if(chargeTimer <= 0)
+        {
+            gameIsOver = true;
+            DeactivateButtons();
+            currentFrogImage.sprite = gameOverScreenSprite;
+        }
+        
+        
         
         
         
@@ -183,25 +240,25 @@ public class Phone : MonoBehaviour
         }
         
 
-        phoneButtons[leafButtonIndex].gameObject.GetComponent<Image>().sprite = leafButtonSprite;
-        phoneButtons[stoneButtonIndex].gameObject.GetComponent<Image>().sprite = stoneButtonSprite;
-        phoneButtons[raindropButtonIndex].gameObject.GetComponent<Image>().sprite = raindropButtonSprite;
+        phoneButtons[leafButtonIndex - 1].gameObject.GetComponent<Image>().sprite = leafButtonSprite;
+        phoneButtons[stoneButtonIndex - 1].gameObject.GetComponent<Image>().sprite = stoneButtonSprite;
+        phoneButtons[raindropButtonIndex - 1].gameObject.GetComponent<Image>().sprite = raindropButtonSprite;
     
-        phoneButtons[leafButtonIndex].onClick.AddListener(() =>
+        phoneButtons[leafButtonIndex - 1].onClick.AddListener(() =>
         {
                 
             DeactivateButtons();
             AddResourceToInventory(ResourceType.Leaf);
                     
         });
-        phoneButtons[stoneButtonIndex].onClick.AddListener(() =>
+        phoneButtons[stoneButtonIndex - 1].onClick.AddListener(() =>
         {
                 
             DeactivateButtons();
             AddResourceToInventory(ResourceType.Stone);
                     
         });
-        phoneButtons[raindropButtonIndex].onClick.AddListener(() =>
+        phoneButtons[raindropButtonIndex - 1].onClick.AddListener(() =>
         {
                 
             DeactivateButtons();
