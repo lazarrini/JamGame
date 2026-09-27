@@ -10,6 +10,9 @@ public class FrogHarem : MonoBehaviour
     [SerializeField] private PlayerStats playerStats;
     public int HaremSize = 6;
     private float _timer;
+
+    [SerializeField] private float foodMultyply = 0.1f;
+    [SerializeField] private float hearthsMultyply = 0.05f;
     
     [SerializeField] private FrogHaremDisplay haremDisplay;
     private void Update()
@@ -18,15 +21,33 @@ public class FrogHarem : MonoBehaviour
         {
             for (int i = 0; i < haremDisplay._frogSlots.Count; i++)
             {
-                haremDisplay._frogSlots[i].foodFillBar.fillAmount += 0.1f * Time.deltaTime;
-                if (haremDisplay._frogSlots[i].foodFillBar.fillAmount >= 1f)
+
+                if (haremDisplay._frogSlots[i].isHungry)
                 {
-                    ChangeFoodParameter();
-                    ChangeHearthsParameter();
-                    haremDisplay._frogSlots[i].foodFillBar.fillAmount = 0f;
-                    FoodIsOverCheck();
+                
+                    haremDisplay._frogSlots[i].fillBar.fillAmount += hearthsMultyply * Time.deltaTime;
+                    if (haremDisplay._frogSlots[i].fillBar.fillAmount >= 1f)
+                    {
+                        ChangeFoodParameter();
+                        ChangeHearthsParameter();
+                        haremDisplay._frogSlots[i].fillBar.fillAmount = 0f;
+                        FoodIsOverCheck();
                     
+                    }
                 }
+                else
+                {
+                    haremDisplay._frogSlots[i].fillBar.fillAmount += foodMultyply * Time.deltaTime;
+                    if (haremDisplay._frogSlots[i].fillBar.fillAmount >= 1f)
+                    {
+                        ChangeFoodParameter();
+                        haremDisplay._frogSlots[i].fillBar.fillAmount = 0f;
+                        FoodIsOverCheck();
+                    
+                    }
+                }
+                
+                
             }
            
         }
@@ -71,7 +92,7 @@ public class FrogHarem : MonoBehaviour
     {
         for (int i = 0; i < harem.Count; i++)
         {
-            playerStats.ChangeFood(harem[i].foodAmount);
+            playerStats.ChangeHearths(harem[i].hearthAmount);
             phone.ShowPopup(harem[i]);
             FoodIsOverCheck();
         }

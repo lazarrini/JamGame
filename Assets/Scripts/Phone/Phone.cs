@@ -82,13 +82,19 @@ public class Phone : MonoBehaviour
     private float chargeFixed;
     
     public int leafCount;
+
+    private bool isStartingLevel = true;
+    private float startingTimer; 
+    
     private void Awake()
     {
+        isStartingLevel = true;
+        startingTimer = 0;
         leafCount = 0;
         gameIsOver = false;
 
         chargeParam = 100f;
-        chargeText.text = chargeParam.ToString();
+        chargeText.text = chargeParam.ToString() + "%";
         
         timer = 0;
         chargeTimer = 100;
@@ -107,7 +113,7 @@ public class Phone : MonoBehaviour
         currentFrog = TakeRandomFrog();
         
         
-        RandomActivateButtons();
+        
         
     }
 
@@ -149,55 +155,70 @@ public class Phone : MonoBehaviour
     }
     private void Update()
     {
-        if(!gameIsOver)
+        if (isStartingLevel)
         {
-            timer += Time.deltaTime;
-            chargeTimer -= Time.deltaTime;
-        }
-        
-        
-        if (timer > 1f)
-        {
-            float randNum = UnityEngine.Random.Range(0, 3);
-            if (randNum >= 0)
+            startingTimer += Time.deltaTime;
+            if (startingTimer >= 3f)
             {
+                isStartingLevel = false;
                 RandomActivateButtons();
             }
+            
+        }
+        else
+        {
+            if(!gameIsOver)
+            {
+                timer += Time.deltaTime;
+                chargeTimer -= Time.deltaTime;
+            }
+        
+        
+            if (timer > 1f)
+            {
+                float randNum = UnityEngine.Random.Range(0, 3);
+                if (randNum >= 0)
+                {
+                    RandomActivateButtons();
+                }
                 
             
-            timer = 0;
-        }
+                timer = 0;
+            }
 
         
-        if (chargeTimer <= (chargeParam - chargeInterval))
-        {
+            if (chargeTimer <= (chargeParam - chargeInterval))
+            {
             
-            chargeText.text = chargeParam.ToString() + "%";
-            if (chargeParam == 80f)
-            {
-                chargeImage.sprite = charge45Sprite;
+                chargeText.text = chargeParam.ToString() + "%";
+                if (chargeParam == 80f)
+                {
+                    chargeImage.sprite = charge45Sprite;
+                }
+                else if (chargeParam == 60f)
+                {
+                    chargeImage.sprite = charge35Sprite;
+                }
+                else if (chargeParam == 40f)
+                {
+                    chargeImage.sprite = charge25Sprite;
+                }
+                else if (chargeParam == 20f)
+                {
+                    chargeImage.sprite = charge15Sprite;
+                }
+                chargeParam -= chargeInterval;
             }
-            else if (chargeParam == 60f)
-            {
-                chargeImage.sprite = charge35Sprite;
-            }
-            else if (chargeParam == 40f)
-            {
-                chargeImage.sprite = charge25Sprite;
-            }
-            else if (chargeParam == 20f)
-            {
-                chargeImage.sprite = charge15Sprite;
-            }
-            chargeParam -= chargeInterval;
-        }
         
-        if(chargeTimer <= 0)
-        {
-            gameIsOver = true;
-            DeactivateButtons();
-            currentFrogImage.sprite = gameOverScreenSprite;
-        }
+            if(chargeTimer <= 0)
+            {
+                gameIsOver = true;
+                DeactivateButtons();
+                currentFrogImage.sprite = gameOverScreenSprite;
+            }
+        }    
+        
+        
         
         
         

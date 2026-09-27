@@ -12,8 +12,12 @@ public class FrogHaremDisplay : MonoBehaviour
 
     [SerializeField] private FrogHarem harem;
 
-    [SerializeField] private PopupWaring fullHaremPopup; 
+    [SerializeField] private PopupWaring fullHaremPopup;
+    [SerializeField] private Sprite foodFillSprite;
+    [SerializeField] private Sprite hearthsFillSprite;
 
+    [SerializeField] private Sprite foodSlotSprite;
+    [SerializeField] private Sprite hearthsSlotSprite;
 
     private void OnEnable()
     {
@@ -38,9 +42,20 @@ public class FrogHaremDisplay : MonoBehaviour
         
         FrogSlot slot = Instantiate(frogSlotPrefab, haremList);
         slot.foodBonus.text = frog.foodAmount.ToString();
-        slot.slotImage.sprite = frog.frogSprite;
-        slot.foodFillBar.fillAmount = 0;
+        slot.avatarImage.sprite = frog.frogSprite;
+        slot.fillBar.fillAmount = 0;
         slot.isHungry = frog.isHungry;
+        if (!slot.isHungry)
+        {
+            slot.slotImage.sprite = foodSlotSprite;
+            slot.fillBar.sprite = foodFillSprite;
+        }
+            
+        else
+        {
+            slot.slotImage.sprite = hearthsSlotSprite;
+            slot.fillBar.sprite = hearthsFillSprite;
+        }
         _frogSlots.Add(slot);
         
     }

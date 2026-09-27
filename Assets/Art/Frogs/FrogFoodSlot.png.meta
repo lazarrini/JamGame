@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: aa3d2adfbb9b1d341829f879ebcaa8a2
+guid: bfe2bee568aa0b6429062b24686005c9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4101504527247542845
-    second: FrogSlot_0
+      213: -2586242681807420544
+    second: FrogFoodSlot_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -113,12 +113,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: FrogSlot_0
+      name: FrogFoodSlot_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 510
+        width: 509
         height: 138
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d3a0f3703a87be830800000000000000
-      internalID: 4101504527247542845
+      spriteID: 0834aefbbf1db1cd0800000000000000
+      internalID: -2586242681807420544
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      FrogSlot_0: 4101504527247542845
+      FrogFoodSlot_0: -2586242681807420544
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

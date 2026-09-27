@@ -59,6 +59,8 @@ public class PlayerStatsDisplay : MonoBehaviour
         for (int i = 0; i < cells.Length; i++)
             cells[i].color = i < value ? filledColor : emptyColor;
         
+        Debug.Log(value);
+        
     }
 
     private void AnimateChange(int from, int to)

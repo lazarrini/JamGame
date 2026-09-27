@@ -22,6 +22,7 @@ public class PlayerStats : ScriptableObject
     public void ChangeFood(int amount)
     {
         food = Math.Clamp(food + amount, 0, 10);
+        Debug.Log("еда изменена");
         OnFoodChanged?.Invoke(food);
     }
 

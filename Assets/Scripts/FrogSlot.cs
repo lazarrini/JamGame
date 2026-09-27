@@ -5,8 +5,9 @@ using TMPro;
 public class FrogSlot : MonoBehaviour
 {
     public TextMeshProUGUI foodBonus;
+    public Image avatarImage;
+    public Image fillBar;
     public Image slotImage;
-    public Image foodFillBar;
     public bool isHungry;
 
 
